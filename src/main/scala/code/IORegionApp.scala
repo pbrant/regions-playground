@@ -17,7 +17,7 @@ object IORegionApp extends App {
     def apply[S] = test1
   }
 
-  val h = IORegion.runRegion(forall1)
-
-  println(h.unsafePerformIO())
+  IORegion.runRegion(forall1)
+    .map(println(_))
+    .unsafePerformIO()
 }

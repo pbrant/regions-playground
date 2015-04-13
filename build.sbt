@@ -12,9 +12,9 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
 {
   libraryDependencies ++= Seq(
-    "org.scalaz" %% "scalaz-core" % "7.1.1" % "compile",
-    "org.scalaz" %% "scalaz-concurrent" % "7.1.1" % "compile",
-    "org.scalaz" %% "scalaz-effect" % "7.1.1" % "compile"
+    "org.scalaz" %% "scalaz-core" % "7.1.2-local-SNAPSHOT" % "compile",
+    "org.scalaz" %% "scalaz-concurrent" % "7.1.2-local-SNAPSHOT" % "compile",
+    "org.scalaz" %% "scalaz-effect" % "7.1.2-local-SNAPSHOT" % "compile"
   )
 }
 

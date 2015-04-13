@@ -75,39 +75,25 @@ object IORegions {
     import IORegion.liftIO
 
     def open[S](path: String): IORegion[S,FileLineReader[({type f[a] = IORegion[S,a]})#f]] = {
-      def openFile(path: String) = {
-        println("Opening file " + path)
-        new BufferedReader(new FileReader(path))
-      }
-
-      def close(path: String, in: BufferedReader): Unit = {
-        try {
-          println("Closing file " + path)
-          in.close()
-        } catch {
-          case e: Throwable => // ignore
-        }
-      }
-
       IORegion[S,FileLineReader[({type f[a] = IORegion[S,a]})#f]](
         for {
-          r <- IO(openFile(path)).liftIO[ResourceReader]
+          r <- IO(IOUtil.openFile(path)).liftIO[ResourceReader]
           refs <- ask[IO,FinalizerRefs]
-          _ <- refs.mod(IO(close(path, r)) :: _).liftIO[ResourceReader]
+          _ <- refs.mod(IO(IOUtil.close(path, r)) :: _).liftIO[ResourceReader]
         } yield new FileLineReader[({type f[a] = IORegion[S,a]})#f](r)
       )
     }
 
     def read[S](resource: FileLineReader[({type f[a] = IORegion[S,a]})#f]): IORegion[S,Option[String]] =
-      liftIO[S,Option[String]](IO(resource.readLine))
+      liftIO[S,Option[String]](IO(resource.readLine()))
 
     def all[S,G[_]](
       resource: FileLineReader[({type f[a] = IORegion[S,a]})#f]
     )(
-      implicit G: MonadPlus[G] with Traverse[G]
+      implicit G: ApplicativePlus[G] with Traverse[G]
     ): IORegion[S,G[String]] = {
       def loop(g: G[String]): IO[G[String]] =
-        IO(resource.readLine).flatMap(o =>
+        IO(resource.readLine()).flatMap(o =>
           o.map(s => loop(G.plus(G.point(s), g))).getOrElse(IO(g))
         )
       liftIO[S,G[String]](loop(G.empty).map(G.reverse))
